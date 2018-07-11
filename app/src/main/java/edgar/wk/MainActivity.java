@@ -2,21 +2,16 @@ package edgar.wk;
 
 import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.model.Response;
@@ -31,6 +26,9 @@ import butterknife.OnClick;
 import edgar.wk.face.dto.FaceDto;
 import edgar.wk.face.dto.Hand;
 import edgar.wk.net.data.callback.JsonCallBack;
+import edgar.wk.utils.ToastManager;
+import edgar.wk.utils.permissions.RxPermissions;
+import io.reactivex.functions.Consumer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -108,7 +106,22 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.btnTakePhoto:
-                applyWritePermission();
+
+                new RxPermissions(MainActivity.this)
+                        .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        .subscribe(new Consumer<Boolean>() {
+                            @Override
+                            public void accept(Boolean accept) throws Exception {
+                                if (accept) {
+                                    //调用相机
+                                    useCamera();
+                                } else {
+                                    ToastManager.getInstance(MainActivity.this).showText("权限被拒绝");
+                                }
+                            }
+                        });
+
+
                 break;
         }
 
@@ -120,53 +133,24 @@ public class MainActivity extends AppCompatActivity {
     private void useCamera() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 //        external-path
-        //        file = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
+//        file = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
 //                + "/test/" + System.currentTimeMillis() + ".jpg");
 //        files-path
 //        file = new File(this.getFilesDir()
 //                + "/test1/" + System.currentTimeMillis() + ".jpg");
 //        cache-path
         file = new File(this.getCacheDir()
-                + "/testc/" + System.currentTimeMillis() + ".jpg");
+                + "/test/" + System.currentTimeMillis() + ".jpg");
         file.getParentFile().mkdirs();
 
         //改变Uri  com.xykj.customview.fileprovider注意和xml中的一致
         Uri uri = FileProvider.getUriForFile(this, "edgar.wk.fileprovider", file);
+
         //添加权限
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         startActivityForResult(intent, REQUEST_CAMERA);
-    }
-
-    public void applyWritePermission() {
-
-        String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
-        if (Build.VERSION.SDK_INT >= 23) {
-            int check = ContextCompat.checkSelfPermission(this, permissions[0]);
-            // 权限是否已经 授权 GRANTED---授权  DINIED---拒绝
-            if (check == PackageManager.PERMISSION_GRANTED) {
-                //调用相机
-                useCamera();
-            } else {
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-            }
-        } else {
-            useCamera();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            useCamera();
-        } else {
-            // 没有获取 到权限，从新请求，或者关闭app
-            Toast.makeText(this, "需要存储权限", Toast.LENGTH_SHORT).show();
-        }
     }
 
     @Override
@@ -181,6 +165,30 @@ public class MainActivity extends AppCompatActivity {
             Uri contentUri = Uri.fromFile(file);
             mediaScanIntent.setData(contentUri);
             sendBroadcast(mediaScanIntent);
+
+
+            OkGo.<FaceDto>post(url)
+                    .headers("enctype", "multipart/form-data")
+                    .params("api_key", api_key)
+                    .params("api_secret", api_secret)
+                    .params("image_file", file)
+                    .execute(new JsonCallBack<FaceDto>(FaceDto.class) {
+
+                        @Override
+                        public void onSuccess(Response<FaceDto> response) {
+                            Log.d(TAG, "数据返回");
+                            FaceDto result = response.body();
+                            if (result != null && result.getHands() != null && result.getHands().size() > 0) {
+                                ToastManager.getInstance(MainActivity.this).showText("数据返回来啦");
+                            }
+                        }
+
+                        @Override
+                        public void onError(Response<FaceDto> response) {
+                            super.onError(response);
+                            ToastManager.getInstance(MainActivity.this).showText("衰佐啦");
+                        }
+                    });
         }
     }
 }

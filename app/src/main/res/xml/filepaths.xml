@@ -2,5 +2,5 @@
 <resources>
     <cache-path
         name="images"
-        path="testc/"/>
+        path="test/"/>
 </resources>
