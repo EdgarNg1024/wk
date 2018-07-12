@@ -1,6 +1,5 @@
 package edgar.wk;
 
-import android.Manifest;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -26,9 +25,8 @@ import butterknife.OnClick;
 import edgar.wk.face.dto.FaceDto;
 import edgar.wk.face.dto.Hand;
 import edgar.wk.net.data.callback.JsonCallBack;
+import edgar.wk.photo.CameraActivity;
 import edgar.wk.utils.ToastManager;
-import edgar.wk.utils.permissions.RxPermissions;
-import io.reactivex.functions.Consumer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     File file;
     int REQUEST_CAMERA = 222;
 
-    @BindView(R.id.btn)
+    @BindView(R.id.btnFace)
     Button btn;
     @BindView(R.id.imageView)
     ImageView imgView;
@@ -61,10 +59,10 @@ public class MainActivity extends AppCompatActivity {
         image_urls.add(image_url2);
     }
 
-    @OnClick({R.id.btn, R.id.btnTakePhoto})
+    @OnClick({R.id.btnFace, R.id.btnTakePhoto})
     void OnClick(View v) {
         switch (v.getId()) {
-            case R.id.btn:
+            case R.id.btnFace:
                 for (int i = 0; i < image_urls.size(); i++) {
                     handSize.add(0);
                     String imgurl = image_urls.get(i);
@@ -107,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.btnTakePhoto:
 
-                new RxPermissions(MainActivity.this)
+  /*              new RxPermissions(MainActivity.this)
                         .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         .subscribe(new Consumer<Boolean>() {
                             @Override
@@ -120,8 +118,10 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                         });
-
-
+*/
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, CameraActivity.class);
+                startActivity(intent);
                 break;
         }
 
