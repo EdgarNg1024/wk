@@ -176,30 +176,39 @@ public class MainActivity extends AppCompatActivity {
 //            mediaScanIntent.setData(contentUri);
 //            sendBroadcast(mediaScanIntent);
 
-            for (String picUrl : picData) {
-                File picFile = new File(picUrl);
-                OkGo.<FaceDto>post(url)
-                        .headers("enctype", "multipart/form-data")
-                        .params("api_key", api_key)
-                        .params("api_secret", api_secret)
-                        .params("image_file", picFile)
-                        .execute(new JsonCallBack<FaceDto>(FaceDto.class) {
+            int i = 0;
+            for (final String picUrl : picData) {
+//            String picUrl = picData.get(0);
+                imgView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        File picFile = new File(picUrl);
+                        OkGo.<FaceDto>post(url)
+                                .headers("enctype", "multipart/form-data")
+                                .params("api_key", api_key)
+                                .params("api_secret", api_secret)
+                                .params("image_file", picFile)
+                                .params("image_file", picUrl)
+                                .execute(new JsonCallBack<FaceDto>(FaceDto.class) {
 
-                            @Override
-                            public void onSuccess(Response<FaceDto> response) {
-                                Log.d(TAG, "数据返回");
-                                FaceDto result = response.body();
-                                if (result != null && result.getHands() != null && result.getHands().size() > 0) {
-                                    ToastManager.getInstance(MainActivity.this).showText("数据返回来啦");
-                                }
-                            }
+                                    @Override
+                                    public void onSuccess(Response<FaceDto> response) {
+                                        Log.d(TAG, "数据返回");
+                                        FaceDto result = response.body();
+                                        if (result != null && result.getHands() != null && result.getHands().size() > 0) {
+                                            ToastManager.getInstance(MainActivity.this).showText("数据返回来啦");
+                                        }
+                                    }
 
-                            @Override
-                            public void onError(Response<FaceDto> response) {
-                                super.onError(response);
-                                ToastManager.getInstance(MainActivity.this).showText("衰佐啦");
-                            }
-                        });
+                                    @Override
+                                    public void onError(Response<FaceDto> response) {
+                                        super.onError(response);
+                                        ToastManager.getInstance(MainActivity.this).showText("衰佐啦");
+                                    }
+                                });
+                    }
+                }, 1500 * i++);
+
             }
         }
     }
