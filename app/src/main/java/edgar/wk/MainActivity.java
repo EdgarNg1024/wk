@@ -26,14 +26,13 @@ import edgar.wk.face.dto.FaceDto;
 import edgar.wk.face.dto.Hand;
 import edgar.wk.net.data.callback.JsonCallBack;
 import edgar.wk.photo.CameraActivity;
-import edgar.wk.utils.ToastManager;
 
 public class MainActivity extends AppCompatActivity {
 
     private final String TAG = getClass().getSimpleName();
 
     File file;
-    int REQUEST_CAMERA = 222;
+    public static int REQUEST_CAMERA = 222;
 
     @BindView(R.id.btnFace)
     Button btn;
@@ -105,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.btnTakePhoto:
 
-  /*              new RxPermissions(MainActivity.this)
+      /*          new RxPermissions(MainActivity.this)
                         .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         .subscribe(new Consumer<Boolean>() {
                             @Override
@@ -117,11 +116,10 @@ public class MainActivity extends AppCompatActivity {
                                     ToastManager.getInstance(MainActivity.this).showText("权限被拒绝");
                                 }
                             }
-                        });
-*/
+                        });*/
                 Intent intent = new Intent();
                 intent.setClass(MainActivity.this, CameraActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, REQUEST_CAMERA);
                 break;
         }
 
@@ -154,41 +152,52 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
 //            imgView.setImageURI(Uri.fromFile(file));
-            imgView.setImageBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()));
+//            imgView.setImageBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()));
+
+            imgView.setImageBitmap(BitmapFactory.decodeFile(data.getStringArrayListExtra("picPathValue").get(0)));
+            final String picUrl = data.getStringArrayListExtra("picPathValue").get(1);
+
+            imgView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d(TAG, "换照片啦");
+                    imgView.setImageBitmap(BitmapFactory.decodeFile(picUrl));
+                }
+            }, 2000);
 
             //在手机相册中显示刚拍摄的图片
-            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-            Uri contentUri = Uri.fromFile(file);
-            mediaScanIntent.setData(contentUri);
-            sendBroadcast(mediaScanIntent);
+//            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+//            Uri contentUri = Uri.fromFile(file);
+//            mediaScanIntent.setData(contentUri);
+//            sendBroadcast(mediaScanIntent);
 
 
-            OkGo.<FaceDto>post(url)
-                    .headers("enctype", "multipart/form-data")
-                    .params("api_key", api_key)
-                    .params("api_secret", api_secret)
-                    .params("image_file", file)
-                    .execute(new JsonCallBack<FaceDto>(FaceDto.class) {
-
-                        @Override
-                        public void onSuccess(Response<FaceDto> response) {
-                            Log.d(TAG, "数据返回");
-                            FaceDto result = response.body();
-                            if (result != null && result.getHands() != null && result.getHands().size() > 0) {
-                                ToastManager.getInstance(MainActivity.this).showText("数据返回来啦");
-                            }
-                        }
-
-                        @Override
-                        public void onError(Response<FaceDto> response) {
-                            super.onError(response);
-                            ToastManager.getInstance(MainActivity.this).showText("衰佐啦");
-                        }
-                    });
+//            OkGo.<FaceDto>post(url)
+//                    .headers("enctype", "multipart/form-data")
+//                    .params("api_key", api_key)
+//                    .params("api_secret", api_secret)
+//                    .params("image_file", file)
+//                    .execute(new JsonCallBack<FaceDto>(FaceDto.class) {
+//
+//                        @Override
+//                        public void onSuccess(Response<FaceDto> response) {
+//                            Log.d(TAG, "数据返回");
+//                            FaceDto result = response.body();
+//                            if (result != null && result.getHands() != null && result.getHands().size() > 0) {
+//                                ToastManager.getInstance(MainActivity.this).showText("数据返回来啦");
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void onError(Response<FaceDto> response) {
+//                            super.onError(response);
+//                            ToastManager.getInstance(MainActivity.this).showText("衰佐啦");
+//                        }
+//                    });
         }
     }
 }

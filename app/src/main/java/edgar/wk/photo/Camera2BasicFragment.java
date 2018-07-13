@@ -22,6 +22,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.ImageFormat;
@@ -74,6 +75,8 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import edgar.wk.R;
+
+import static android.app.Activity.RESULT_OK;
 
 public class Camera2BasicFragment extends Fragment
         implements View.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback {
@@ -247,6 +250,8 @@ public class Camera2BasicFragment extends Fragment
 
         @Override
         public void onImageAvailable(ImageReader reader) {
+            mFile = new File(getActivity().getExternalFilesDir(null), "pic" + System.currentTimeMillis() + ".jpg");
+            resultPicPathValue.add(mFile.toString());
             mBackgroundHandler.post(new ImageSaver(reader.acquireNextImage(), mFile));
         }
 
@@ -438,7 +443,7 @@ public class Camera2BasicFragment extends Fragment
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mFile = new File(getActivity().getExternalFilesDir(null), "pic.jpg");
+//        mFile = new File(getActivity().getExternalFilesDir(null), "pic.jpg");
     }
 
     @Override
@@ -456,7 +461,7 @@ public class Camera2BasicFragment extends Fragment
             mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
         }
 
-//        photossss();
+        photossss();
     }
 
     long timesim;
@@ -827,6 +832,11 @@ public class Camera2BasicFragment extends Fragment
         }
     }
 
+    int picCount = 0;
+
+    ArrayList<String> resultPicPathTime = new ArrayList<>(10);
+    ArrayList<String> resultPicPathValue = new ArrayList<>(10);
+
     /**
      * Capture a still picture. This method should be called when we get a response in
      * {@link #mCaptureCallback} from both {@link #lockFocus()}.
@@ -858,9 +868,20 @@ public class Camera2BasicFragment extends Fragment
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                                                @NonNull CaptureRequest request,
                                                @NonNull TotalCaptureResult result) {
+                    picCount++;
                     showToast("Saved: " + mFile);
-                    Log.d(TAG, "拍完照啦:" + (System.currentTimeMillis() - timesim));
+                    Log.d(TAG, "第" + picCount + "张(" + timesim + ")拍完照啦:" + (System.currentTimeMillis() - timesim));
                     Log.d(TAG, mFile.toString());
+
+                    resultPicPathTime.add(timesim + "");
+//                    resultPicPathValue.add(mFile.toString());
+                    if (picCount >= 2) {
+                        Intent intent = new Intent();
+                        intent.putStringArrayListExtra("picPathKey", resultPicPathTime);
+                        intent.putStringArrayListExtra("picPathValue", resultPicPathValue);
+                        getActivity().setResult(RESULT_OK, intent);
+                        getActivity().finish();
+                    }
                     unlockFocus();
                 }
             };
@@ -872,6 +893,7 @@ public class Camera2BasicFragment extends Fragment
             e.printStackTrace();
         }
     }
+
 
     /**
      * Retrieves the JPEG orientation from the specified screen rotation.
