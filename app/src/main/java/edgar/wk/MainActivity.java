@@ -26,6 +26,7 @@ import edgar.wk.face.dto.FaceDto;
 import edgar.wk.face.dto.Hand;
 import edgar.wk.net.data.callback.JsonCallBack;
 import edgar.wk.photo.CameraActivity;
+import edgar.wk.utils.ToastManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -157,9 +158,9 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
 //            imgView.setImageURI(Uri.fromFile(file));
 //            imgView.setImageBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()));
-
-            imgView.setImageBitmap(BitmapFactory.decodeFile(data.getStringArrayListExtra("picPathValue").get(0)));
-            final String picUrl = data.getStringArrayListExtra("picPathValue").get(1);
+            ArrayList<String> picData = data.getStringArrayListExtra("picPathValue");
+            imgView.setImageBitmap(BitmapFactory.decodeFile(picData.get(0)));
+     /*       final String picUrl = data.getStringArrayListExtra("picPathValue").get(1);
 
             imgView.postDelayed(new Runnable() {
                 @Override
@@ -167,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "换照片啦");
                     imgView.setImageBitmap(BitmapFactory.decodeFile(picUrl));
                 }
-            }, 2000);
+            }, 2000);*/
 
             //在手机相册中显示刚拍摄的图片
 //            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
@@ -175,29 +176,31 @@ public class MainActivity extends AppCompatActivity {
 //            mediaScanIntent.setData(contentUri);
 //            sendBroadcast(mediaScanIntent);
 
+            for (String picUrl : picData) {
+                File picFile = new File(picUrl);
+                OkGo.<FaceDto>post(url)
+                        .headers("enctype", "multipart/form-data")
+                        .params("api_key", api_key)
+                        .params("api_secret", api_secret)
+                        .params("image_file", picFile)
+                        .execute(new JsonCallBack<FaceDto>(FaceDto.class) {
 
-//            OkGo.<FaceDto>post(url)
-//                    .headers("enctype", "multipart/form-data")
-//                    .params("api_key", api_key)
-//                    .params("api_secret", api_secret)
-//                    .params("image_file", file)
-//                    .execute(new JsonCallBack<FaceDto>(FaceDto.class) {
-//
-//                        @Override
-//                        public void onSuccess(Response<FaceDto> response) {
-//                            Log.d(TAG, "数据返回");
-//                            FaceDto result = response.body();
-//                            if (result != null && result.getHands() != null && result.getHands().size() > 0) {
-//                                ToastManager.getInstance(MainActivity.this).showText("数据返回来啦");
-//                            }
-//                        }
-//
-//                        @Override
-//                        public void onError(Response<FaceDto> response) {
-//                            super.onError(response);
-//                            ToastManager.getInstance(MainActivity.this).showText("衰佐啦");
-//                        }
-//                    });
+                            @Override
+                            public void onSuccess(Response<FaceDto> response) {
+                                Log.d(TAG, "数据返回");
+                                FaceDto result = response.body();
+                                if (result != null && result.getHands() != null && result.getHands().size() > 0) {
+                                    ToastManager.getInstance(MainActivity.this).showText("数据返回来啦");
+                                }
+                            }
+
+                            @Override
+                            public void onError(Response<FaceDto> response) {
+                                super.onError(response);
+                                ToastManager.getInstance(MainActivity.this).showText("衰佐啦");
+                            }
+                        });
+            }
         }
     }
 }

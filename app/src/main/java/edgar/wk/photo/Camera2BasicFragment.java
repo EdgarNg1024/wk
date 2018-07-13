@@ -471,7 +471,7 @@ public class Camera2BasicFragment extends Fragment
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    Log.d("sssssssssssssss", "执行啦");
+                    Log.d(TAG, "执行啦");
                     timesim = System.currentTimeMillis();
                     takePicture();
                 }
