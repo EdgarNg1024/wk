@@ -11,13 +11,14 @@ import android.util.Log;
 import android.util.LongSparseArray;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.model.Response;
 import com.ubtrobot.mini.action.ActionApi;
 import com.ubtrobot.mini.action.ActionInfo;
-import com.ubtrobot.mini.motor.MotorApi;
+import com.ubtrobot.mini.action.PlayActionListener;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -44,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
     Button btn;
     @BindView(R.id.imageView)
     ImageView imgView;
+
+    @BindView(R.id.actionET)
+    EditText actionET;
 
     String url = "https://api-cn.faceplusplus.com/humanbodypp/beta/gesture";
     String api_key = "C3REx0MTx_6Fd5IzSCYkJ2CPG46fTsiU";
@@ -127,8 +131,61 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, REQUEST_CAMERA);
                 break;
             case R.id.btnAction:
-                getActionList(v);
-                MotorApi.moveToAbsoluteAngle();
+//                getActionList(v);
+
+                actionApi.playAction(actionET.getText().toString(), new PlayActionListener() {
+                    @Override
+                    public void onStart() {
+                        Log.i(TAG, "playAction开始执行动作!");
+                    }
+
+                    @Override
+                    public void onFinished() {
+                        Log.i(TAG, "playAction动作执行结束!");
+                    }
+
+                    @Override
+                    public void onFailure(int errorCode, String errorMsg) {
+                        Log.i(TAG, "playAction执行表情错误,errorCode:" + errorCode + ",errorMsg:" + errorMsg);
+                    }
+                });
+                Log.i(TAG, "playAction 接口调用成功!");
+
+//                int moveTime = 100;
+//                ArrayList<MotionParam> angleList = new ArrayList<MotionParam>();
+//
+//                MotionParam motor1 = new MotionParam(1, 120, RunMode.LINEAR, moveTime);
+//                MotionParam motor2 = new MotionParam(2, 120, RunMode.LINEAR, moveTime);
+//                MotionParam motor3 = new MotionParam(3, 120, RunMode.LINEAR, moveTime);
+//                MotionParam motor4 = new MotionParam(4, 120, RunMode.LINEAR, moveTime);
+//                MotionParam motor5 = new MotionParam(5, 120, RunMode.LINEAR, moveTime);
+//                MotionParam motor6 = new MotionParam(6, 120, RunMode.LINEAR, moveTime);
+//                MotionParam motor7 = new MotionParam(7, 120, RunMode.LINEAR, moveTime);
+//                MotionParam motor8 = new MotionParam(8, 120, RunMode.LINEAR, moveTime);
+//                MotionParam motor9 = new MotionParam(9, 120, RunMode.LINEAR, moveTime);
+//                MotionParam motor10 = new MotionParam(10, 120, RunMode.LINEAR, moveTime);
+//                MotionParam motor11 = new MotionParam(11, 120, RunMode.LINEAR, moveTime);
+//                MotionParam motor12 = new MotionParam(12, 120, RunMode.LINEAR, moveTime);
+//                MotionParam motor13 = new MotionParam(13, 120, RunMode.LINEAR, moveTime);
+//                MotionParam motor14 = new MotionParam(14, 120, RunMode.LINEAR, moveTime);
+//
+//
+//                angleList.add(motor1);
+//                angleList.add(motor2);
+//                angleList.add(motor3);
+//                angleList.add(motor4);
+//                angleList.add(motor5);
+//                angleList.add(motor6);
+//                angleList.add(motor7);
+//                angleList.add(motor8);
+//                angleList.add(motor9);
+//                angleList.add(motor10);
+//                angleList.add(motor11);
+//                angleList.add(motor12);
+//                angleList.add(motor13);
+//                angleList.add(motor14);
+//
+//                MotorApi.get().moveToAngle(angleList, null);
                 break;
         }
 
@@ -243,6 +300,7 @@ public class MainActivity extends AppCompatActivity {
     public void getActionList(View view) {
         List<ActionInfo> actionList = actionApi.getActionList();
         for (ActionInfo actionInfo : actionList) {
+            Log.i(TAG, "============================================");
             Log.i(TAG, "Action name======" + actionInfo.getName());
             Log.i(TAG, "Action Id======" + actionInfo.getId());
             Log.i(TAG, "Action Description======" + actionInfo.getDescription());
