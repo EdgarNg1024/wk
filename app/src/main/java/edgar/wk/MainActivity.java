@@ -8,6 +8,7 @@ import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.LongSparseArray;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -31,7 +32,7 @@ import edgar.wk.utils.ToastManager;
 public class MainActivity extends AppCompatActivity {
 
     private final String TAG = getClass().getSimpleName();
-
+    LongSparseArray<FaceDto> resultFace = new LongSparseArray<FaceDto>();
     File file;
     public static int REQUEST_CAMERA = 222;
 
@@ -197,6 +198,11 @@ public class MainActivity extends AppCompatActivity {
                                         FaceDto result = response.body();
                                         if (result != null && result.getHands() != null && result.getHands().size() > 0) {
                                             ToastManager.getInstance(MainActivity.this).showText("数据返回来啦");
+                                            Long key = Long.parseLong(result.getRequest_id().split(",")[0]);
+                                            resultFace.put(key, result);
+                                            if (resultFace.size() > 2) {
+                                                ToastManager.getInstance(MainActivity.this).showText("处理完成~");
+                                            }
                                         }
                                     }
 
