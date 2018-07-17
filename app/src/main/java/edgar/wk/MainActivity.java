@@ -15,6 +15,9 @@ import android.widget.ImageView;
 
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.model.Response;
+import com.ubtrobot.mini.action.ActionApi;
+import com.ubtrobot.mini.action.ActionInfo;
+import com.ubtrobot.mini.motor.MotorApi;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -35,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     LongSparseArray<FaceDto> resultFace = new LongSparseArray<FaceDto>();
     File file;
     public static int REQUEST_CAMERA = 222;
+    private ActionApi actionApi;
 
     @BindView(R.id.btnFace)
     Button btn;
@@ -58,9 +62,11 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         image_urls.add(image_url1);
         image_urls.add(image_url2);
+
+        initRobot();
     }
 
-    @OnClick({R.id.btnFace, R.id.btnTakePhoto})
+    @OnClick({R.id.btnFace, R.id.btnTakePhoto, R.id.btnAction})
     void OnClick(View v) {
         switch (v.getId()) {
             case R.id.btnFace:
@@ -96,9 +102,6 @@ public class MainActivity extends AppCompatActivity {
                                             }
                                         }
 
-//                                        if (hands.get(0).getGesture().getHand_open() > 50) {
-//                                            Log.d(TAG, "你打了我一巴掌呢");
-//                                        }
                                     }
                                 }
                             });
@@ -122,6 +125,10 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 intent.setClass(MainActivity.this, CameraActivity.class);
                 startActivityForResult(intent, REQUEST_CAMERA);
+                break;
+            case R.id.btnAction:
+                getActionList(v);
+                MotorApi.moveToAbsoluteAngle();
                 break;
         }
 
@@ -178,6 +185,8 @@ public class MainActivity extends AppCompatActivity {
 //            sendBroadcast(mediaScanIntent);
 
             int i = 0;
+            resultFace.clear();
+
             for (final String picUrl : picData) {
 //            String picUrl = picData.get(0);
                 imgView.postDelayed(new Runnable() {
@@ -200,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
                                             ToastManager.getInstance(MainActivity.this).showText("数据返回来啦");
                                             Long key = Long.parseLong(result.getRequest_id().split(",")[0]);
                                             resultFace.put(key, result);
-                                            if (resultFace.size() > 2) {
+                                            if (resultFace.size() >= 2) {
                                                 ToastManager.getInstance(MainActivity.this).showText("处理完成~");
                                             }
                                         }
@@ -218,4 +227,28 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    /**
+     * 初始化接口类实例
+     */
+    private void initRobot() {
+        actionApi = ActionApi.get();
+    }
+
+    /**
+     * 获取动作列表
+     *
+     * @param view
+     */
+    public void getActionList(View view) {
+        List<ActionInfo> actionList = actionApi.getActionList();
+        for (ActionInfo actionInfo : actionList) {
+            Log.i(TAG, "Action name======" + actionInfo.getName());
+            Log.i(TAG, "Action Id======" + actionInfo.getId());
+            Log.i(TAG, "Action Description======" + actionInfo.getDescription());
+            Log.i(TAG, "Action Duration======" + actionInfo.getDuration());
+        }
+        Log.i(TAG, "getActionList接口调用成功!");
+    }
+
 }
