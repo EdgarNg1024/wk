@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 });
                     }
-                }, 500 * i++);
+                }, 1500 * i++);
 
             }
         }

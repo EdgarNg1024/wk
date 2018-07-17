@@ -540,7 +540,7 @@ public class Camera2BasicFragment extends Fragment
 //                Size largest = Collections.max(
 //                        Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)),
 //                        new CompareSizesByArea());
-                Size largest = new Size(640, 360);
+                Size largest = new Size(640, 480);
                 mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(),
                         ImageFormat.JPEG, /*maxImages*/2);
                 mImageReader.setOnImageAvailableListener(
