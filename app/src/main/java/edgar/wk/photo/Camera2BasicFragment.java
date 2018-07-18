@@ -475,7 +475,7 @@ public class Camera2BasicFragment extends Fragment
                     timesim = System.currentTimeMillis();
                     takePicture();
                 }
-            }, 2000 * (i + 1));
+            }, 2 * 1000 * (i + 1));
         }
 
     }

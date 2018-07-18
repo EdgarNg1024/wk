@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }, 1000 * 3);
                     }
-                }, 1000 * 10);
+                }, 1000 * 5);
 
                 break;
             case R.id.btnAction:
