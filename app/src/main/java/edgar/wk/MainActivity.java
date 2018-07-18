@@ -2,6 +2,7 @@ package edgar.wk;
 
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -19,10 +20,13 @@ import com.lzy.okgo.model.Response;
 import com.ubtrobot.mini.action.ActionApi;
 import com.ubtrobot.mini.action.ActionInfo;
 import com.ubtrobot.mini.action.PlayActionListener;
+import com.ubtrobot.mini.led.MouthLedApi;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -126,9 +130,29 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                         });*/
-                Intent intent = new Intent();
-                intent.setClass(MainActivity.this, CameraActivity.class);
-                startActivityForResult(intent, REQUEST_CAMERA);
+
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+//                        Intent intent = new Intent();
+//                        intent.setClass(MainActivity.this, CameraActivity.class);
+//                        startActivityForResult(intent, REQUEST_CAMERA);
+                        MouthLedApi mouthLedApi = MouthLedApi.get();
+                        mouthLedApi.startBreathModel(Color.argb(0, 255, 255, 0), 1000 * 3);
+                        new Timer().schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                Intent intent = new Intent();
+                                intent.setClass(MainActivity.this, CameraActivity.class);
+                                startActivityForResult(intent, REQUEST_CAMERA);
+//                                MouthLedApi mouthLedApi = MouthLedApi.get();
+//                                mouthLedApi.startBreathModel(Color.argb(0, 255, 255, 0), 10000);
+
+                            }
+                        }, 1000 * 3);
+                    }
+                }, 1000 * 10);
+
                 break;
             case R.id.btnAction:
 //                getActionList(v);
@@ -268,6 +292,22 @@ public class MainActivity extends AppCompatActivity {
                                             resultFace.put(key, result);
                                             if (resultFace.size() >= 2) {
                                                 ToastManager.getInstance(MainActivity.this).showText("处理完成~");
+                                                actionApi.playAction("023", new PlayActionListener() {
+                                                    @Override
+                                                    public void onStart() {
+                                                        Log.i(TAG, "playAction开始执行动作!");
+                                                    }
+
+                                                    @Override
+                                                    public void onFinished() {
+                                                        Log.i(TAG, "playAction动作执行结束!");
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(int errorCode, String errorMsg) {
+                                                        Log.i(TAG, "playAction执行表情错误,errorCode:" + errorCode + ",errorMsg:" + errorMsg);
+                                                    }
+                                                });
                                             }
                                         }
                                     }
@@ -279,7 +319,7 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 });
                     }
-                }, 1500 * i++);
+                }, 2000 * i++);
 
             }
         }

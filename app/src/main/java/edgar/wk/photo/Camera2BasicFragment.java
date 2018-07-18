@@ -461,7 +461,7 @@ public class Camera2BasicFragment extends Fragment
             mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
         }
 
-//        photossss();
+        photossss();
     }
 
     long timesim;
@@ -475,7 +475,7 @@ public class Camera2BasicFragment extends Fragment
                     timesim = System.currentTimeMillis();
                     takePicture();
                 }
-            }, 1500 * (i + 1));
+            }, 2000 * (i + 1));
         }
 
     }
