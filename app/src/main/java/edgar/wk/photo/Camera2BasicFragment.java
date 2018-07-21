@@ -464,19 +464,23 @@ public class Camera2BasicFragment extends Fragment
         photossss();
     }
 
-    long timesim;
+    private final int phontNum = 5;
 
     private void photossss() {
-        for (int i = 0; i < 2; i++) {
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    Log.d(TAG, "执行啦");
-                    timesim = System.currentTimeMillis();
-                    takePicture();
-                }
-            }, 2 * 1000 * (i + 1));
-        }
+
+        this.getView().postDelayed(() -> {
+            for (int i = 0; i < phontNum; i++) {
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        Log.d(TAG, "执行啦");
+                        takePicture();
+                    }
+                }, 700 * (i + 1));
+            }
+
+        }, 1500);
+
 
     }
 
@@ -835,7 +839,6 @@ public class Camera2BasicFragment extends Fragment
 
     int picCount = 0;
 
-    ArrayList<String> resultPicPathTime = new ArrayList<>(10);
     ArrayList<String> resultPicPathValue = new ArrayList<>(10);
 
     /**
@@ -871,19 +874,17 @@ public class Camera2BasicFragment extends Fragment
                                                @NonNull TotalCaptureResult result) {
                     picCount++;
                     showToast("Saved: " + mFile);
-                    Log.d(TAG, "第" + picCount + "张(" + timesim + ")拍完照啦:" + (System.currentTimeMillis() - timesim));
+                    Log.d(TAG, "第" + picCount + "张拍完照啦");
                     Log.d(TAG, mFile.toString());
 
-                    resultPicPathTime.add(timesim + "");
 //                    resultPicPathValue.add(mFile.toString());
-                    if (picCount >= 2) {
+                    if (picCount >= phontNum) {
                         Intent intent = new Intent();
-                        intent.putStringArrayListExtra("picPathKey", resultPicPathTime);
                         intent.putStringArrayListExtra("picPathValue", resultPicPathValue);
                         getActivity().setResult(RESULT_OK, intent);
-                        unlockFocus();
                         getActivity().finish();
                     }
+                    unlockFocus();
                 }
             };
 
