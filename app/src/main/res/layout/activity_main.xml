@@ -10,44 +10,12 @@
         android:id="@+id/btnTakePhoto"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="74dp"
+        android:layout_marginTop="28dp"
         android:text="take photo"
-        app:layout_constraintBottom_toTopOf="@+id/imageView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.156" />
-
-    <Button
-        android:id="@+id/btnFace"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Face++"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnTakePhoto" />
-
-    <Button
-        android:visibility="gone"
-        android:id="@+id/btnAction"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:text="Action"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnTakePhoto" />
-
-    <EditText
-        android:id="@+id/actionET"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnAction" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <ImageView
@@ -56,9 +24,10 @@
         android:layout_height="300dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="60dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/actionET" />
+        app:layout_constraintTop_toBottomOf="@+id/btnTakePhoto" />
 
 
 </android.support.constraint.ConstraintLayout>

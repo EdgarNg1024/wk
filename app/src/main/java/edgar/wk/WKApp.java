@@ -1,6 +1,7 @@
 package edgar.wk;
 
 import com.ubtrobot.mini.RobotApplication;
+import com.ubtrobot.mini.RobotSkillInfo;
 
 public class WKApp extends RobotApplication {
 
@@ -9,13 +10,10 @@ public class WKApp extends RobotApplication {
         super.onCreate();
     }
 
-    /**
-     * 当前应用与其他正在运行的应用冲突时调用
-     *
-     * @param ubtSkillInfo 正在运行的应用信息
-     */
+
+
     @Override
-    protected void onStartFailed(RobotApplication.UbtSkillInfo ubtSkillInfo) {
+    protected void onStartFailed(RobotSkillInfo robotSkillInfo) {
 
     }
 

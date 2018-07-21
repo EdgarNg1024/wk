@@ -881,9 +881,9 @@ public class Camera2BasicFragment extends Fragment
                         intent.putStringArrayListExtra("picPathKey", resultPicPathTime);
                         intent.putStringArrayListExtra("picPathValue", resultPicPathValue);
                         getActivity().setResult(RESULT_OK, intent);
+                        unlockFocus();
                         getActivity().finish();
                     }
-                    unlockFocus();
                 }
             };
 
