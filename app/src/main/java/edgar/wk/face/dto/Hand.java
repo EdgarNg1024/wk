@@ -14,7 +14,7 @@ package edgar.wk.face.dto;
 public class Hand {
 
     private Gesture gesture;
-    private Hand_rectangle hand_rectangle;
+    private HandRectangle hand_rectangle;
     public void setGesture(Gesture gesture) {
         this.gesture = gesture;
     }
@@ -22,10 +22,10 @@ public class Hand {
         return gesture;
     }
 
-    public void setHand_rectangle(Hand_rectangle hand_rectangle) {
+    public void setHand_rectangle(HandRectangle hand_rectangle) {
         this.hand_rectangle = hand_rectangle;
     }
-    public Hand_rectangle getHand_rectangle() {
+    public HandRectangle getHand_rectangle() {
         return hand_rectangle;
     }
 

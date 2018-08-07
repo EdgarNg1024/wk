@@ -464,7 +464,7 @@ public class Camera2BasicFragment extends Fragment
         photossss();
     }
 
-    private final int phontNum = 5;
+    private final int phontNum = 15;
 
     private void photossss() {
 
@@ -476,7 +476,7 @@ public class Camera2BasicFragment extends Fragment
                         Log.d(TAG, "执行啦");
                         takePicture();
                     }
-                }, 700 * (i + 1));
+                }, 600 * (i + 1));
             }
 
         }, 1500);
@@ -814,7 +814,7 @@ public class Camera2BasicFragment extends Fragment
             mState = STATE_WAITING_LOCK;
             mCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
                     mBackgroundHandler);
-        } catch (CameraAccessException e) {
+        } catch (CameraAccessException | NullPointerException e) {
             e.printStackTrace();
         }
     }
@@ -873,12 +873,14 @@ public class Camera2BasicFragment extends Fragment
                                                @NonNull CaptureRequest request,
                                                @NonNull TotalCaptureResult result) {
                     picCount++;
-                    showToast("Saved: " + mFile);
+//                    showToast("Saved: " + mFile);
+                    showToast("第" + picCount + "张拍完照啦");
                     Log.d(TAG, "第" + picCount + "张拍完照啦");
                     Log.d(TAG, mFile.toString());
 
 //                    resultPicPathValue.add(mFile.toString());
-                    if (picCount >= phontNum) {
+//                    if (picCount >= phontNum - 2) {
+                    if (picCount >= 4) {
                         Intent intent = new Intent();
                         intent.putStringArrayListExtra("picPathValue", resultPicPathValue);
                         getActivity().setResult(RESULT_OK, intent);
@@ -927,7 +929,10 @@ public class Camera2BasicFragment extends Fragment
             mState = STATE_PREVIEW;
             mCaptureSession.setRepeatingRequest(mPreviewRequest, mCaptureCallback,
                     mBackgroundHandler);
-        } catch (CameraAccessException e) {
+        } catch (CameraAccessException | NullPointerException | IllegalStateException e) {
+            e.printStackTrace();
+        }
+        catch (Exception e){
             e.printStackTrace();
         }
     }

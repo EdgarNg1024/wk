@@ -2,14 +2,12 @@ package edgar.wk;
 
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.util.LongSparseArray;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -18,18 +16,19 @@ import com.lzy.okgo.model.Response;
 import com.ubtrobot.mini.action.ActionApi;
 import com.ubtrobot.mini.action.ActionInfo;
 import com.ubtrobot.mini.action.PlayActionListener;
-import com.ubtrobot.mini.led.MouthLedApi;
+import com.ubtrobot.mini.voice.VoicePool;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import edgar.wk.face.dto.FaceDto;
+import edgar.wk.face.dto.HandRectangle;
 import edgar.wk.net.data.callback.JsonCallBack;
 import edgar.wk.photo.CameraActivity;
 import edgar.wk.utils.ToastManager;
@@ -38,10 +37,11 @@ import io.reactivex.annotations.NonNull;
 public class MainActivity extends AppCompatActivity {
 
     private final String TAG = getClass().getSimpleName();
-    LongSparseArray<FaceDto> resultFace = new LongSparseArray<FaceDto>();
+    HashMap<Long, FaceDto> resultFace = new HashMap<Long, FaceDto>();
     File file;
     public static int REQUEST_CAMERA = 222;
     private ActionApi actionApi;
+
 
     @BindView(R.id.imageView)
     ImageView imgView;
@@ -64,25 +64,25 @@ public class MainActivity extends AppCompatActivity {
         switch (v.getId()) {
             case R.id.btnTakePhoto:
 
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        MouthLedApi mouthLedApi = MouthLedApi.get();
-                        mouthLedApi.startBreathModel(Color.argb(0, 255, 255, 0), 1000 * 3);
-                        new Timer().schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                Intent intent = new Intent();
-                                intent.setClass(MainActivity.this, CameraActivity.class);
-                                startActivityForResult(intent, REQUEST_CAMERA);
-//                                MouthLedApi mouthLedApi = MouthLedApi.get();
-//                                mouthLedApi.startBreathModel(Color.argb(0, 255, 255, 0), 10000);
-
-                            }
-                        }, 1000 * 3);
-                    }
-                }, 1000 * 1);
-
+//                new Timer().schedule(new TimerTask() {
+//                    @Override
+//                    public void run() {
+//                        MouthLedApi mouthLedApi = MouthLedApi.get();
+//                        mouthLedApi.startBreathModel(Color.argb(0, 255, 255, 0), 1000 * 3);
+//                        new Timer().schedule(new TimerTask() {
+//                            @Override
+//                            public void run() {
+//
+////                                MouthLedApi mouthLedApi = MouthLedApi.get();
+////                                mouthLedApi.startBreathModel(Color.argb(0, 255, 255, 0), 10000);
+//
+//                            }
+//                        }, 1000 * 0);
+//                    }
+//                }, 1000 * 0);
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, CameraActivity.class);
+                startActivityForResult(intent, REQUEST_CAMERA);
                 break;
 
 //                int moveTime = 100;
@@ -154,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
+            isDealActionEd = false;
             ArrayList<String> picData = data.getStringArrayListExtra("picPathValue");
             imgView.setImageBitmap(BitmapFactory.decodeFile(picData.get(0)));
 
@@ -235,11 +236,29 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param resultFace
      */
-    private void dealAction(@NonNull LongSparseArray<FaceDto> resultFace) {
+    private void dealAction(@NonNull HashMap<Long, FaceDto> resultFace) {
         if (resultFace.size() >= 2 && !isDealActionEd) {
             isDealActionEd = true;
-            ToastManager.getInstance(MainActivity.this).showText("开始执行动作~");
-            actionApi.playAction("023", new PlayActionListener() {
+            //默认向前走
+            String actionValue = "023";
+
+            ArrayList<Long> keysorted = new ArrayList<Long>(resultFace.keySet());
+            Collections.sort(keysorted);
+            HandRectangle handRectangle0 = resultFace.get(keysorted.get(0)).getHands().get(0).getHand_rectangle();
+            HandRectangle handRectangle1 = resultFace.get(keysorted.get(1)).getHands().get(0).getHand_rectangle();
+            if (handRectangle0.getHeight() * handRectangle0.getWidth() > handRectangle1.getHeight() * handRectangle1.getWidth()) {
+                //向前走
+                actionValue = "023";
+                VoicePool.get().playTTs("好大的吸力,是谁用了魔法", null);
+            } else {
+                //向后走
+                actionValue = "022";
+                VoicePool.get().playTTs("好强的招式,吹得我直往后走呢", null);
+            }
+
+
+            //执行动作
+            actionApi.playAction(actionValue, new PlayActionListener() {
                 @Override
                 public void onStart() {
                     Log.i(TAG, "playAction开始执行动作!");

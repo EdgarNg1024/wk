@@ -9,7 +9,7 @@ package edgar.wk.face.dto;
  * @author bejson.com (i@bejson.com)
  * @website http://www.bejson.com/java2pojo/
  */
-public class Hand_rectangle {
+public class HandRectangle {
 
     private int width;
     private int top;
