@@ -29,6 +29,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import edgar.wk.face.dto.FaceDto;
 import edgar.wk.face.dto.HandRectangle;
+import edgar.wk.fall.FallAlertActivity;
 import edgar.wk.net.data.callback.JsonCallBack;
 import edgar.wk.photo.CameraActivity;
 import edgar.wk.utils.ToastManager;
@@ -59,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         initRobot();
     }
 
-    @OnClick({R.id.btnTakePhoto})
+    @OnClick({R.id.btnTakePhoto, R.id.btnPoseNet})
     void OnClick(View v) {
         switch (v.getId()) {
             case R.id.btnTakePhoto:
@@ -84,7 +85,11 @@ public class MainActivity extends AppCompatActivity {
                 intent.setClass(MainActivity.this, CameraActivity.class);
                 startActivityForResult(intent, REQUEST_CAMERA);
                 break;
-
+            case R.id.btnPoseNet:
+                Intent i = new Intent();
+                i.setClass(MainActivity.this, FallAlertActivity.class);
+                startActivity(i);
+                break;
 //                int moveTime = 100;
 //                ArrayList<MotionParam> angleList = new ArrayList<MotionParam>();
 //
@@ -253,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 //向后走
                 actionValue = "022";
-                VoicePool.get().playTTs("好强的招式,吹得我直往后走呢", null);
+                VoicePool.get().playTTs("好强的招式,吓得我直往后走呢", null);
             }
 
 
