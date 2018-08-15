@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package edgar.wk.photo;
+package edgar.wk.fall;
 
 import android.Manifest;
 import android.app.Activity;
@@ -69,12 +69,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import edgar.wk.R;
+import edgar.wk.photo.AutoFitTextureView;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -184,7 +183,7 @@ public class Camera2BasicFragment extends Fragment
     private CameraDevice mCameraDevice;
 
     /**
-     * The {@link android.util.Size} of camera preview.
+     * The {@link Size} of camera preview.
      */
     private Size mPreviewSize;
 
@@ -250,8 +249,6 @@ public class Camera2BasicFragment extends Fragment
 
         @Override
         public void onImageAvailable(ImageReader reader) {
-            mFile = new File(getActivity().getExternalFilesDir(null), "pic" + System.currentTimeMillis() + ".jpg");
-            resultPicPathValue.add(mFile.toString());
             mBackgroundHandler.post(new ImageSaver(reader.acquireNextImage(), mFile));
         }
 
@@ -391,7 +388,7 @@ public class Camera2BasicFragment extends Fragment
      * @return The optimal {@code Size}, or an arbitrary one if none were big enough
      */
     private static Size chooseOptimalSize(Size[] choices, int textureViewWidth,
-                                          int textureViewHeight, int maxWidth, int maxHeight, Size aspectRatio) {
+            int textureViewHeight, int maxWidth, int maxHeight, Size aspectRatio) {
 
         // Collect the supported resolutions that are at least as big as the preview Surface
         List<Size> bigEnough = new ArrayList<>();
@@ -403,7 +400,7 @@ public class Camera2BasicFragment extends Fragment
             if (option.getWidth() <= maxWidth && option.getHeight() <= maxHeight &&
                     option.getHeight() == option.getWidth() * h / w) {
                 if (option.getWidth() >= textureViewWidth &&
-                        option.getHeight() >= textureViewHeight) {
+                    option.getHeight() >= textureViewHeight) {
                     bigEnough.add(option);
                 } else {
                     notBigEnough.add(option);
@@ -460,30 +457,7 @@ public class Camera2BasicFragment extends Fragment
         } else {
             mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
         }
-
-        photossss();
     }
-
-    private final int phontNum = 15;
-
-    private void photossss() {
-
-        this.getView().postDelayed(() -> {
-            for (int i = 0; i < phontNum; i++) {
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        Log.d(TAG, "执行啦");
-                        takePicture();
-                    }
-                }, 600 * (i + 1));
-            }
-
-        }, 1500);
-
-
-    }
-
 
     @Override
     public void onPause() {
@@ -763,7 +737,7 @@ public class Camera2BasicFragment extends Fragment
     }
 
     /**
-     * Configures the necessary {@link android.graphics.Matrix} transformation to `mTextureView`.
+     * Configures the necessary {@link Matrix} transformation to `mTextureView`.
      * This method should be called after the camera preview size is determined in
      * setUpCameraOutputs and also the size of `mTextureView` is fixed.
      *
@@ -814,7 +788,7 @@ public class Camera2BasicFragment extends Fragment
             mState = STATE_WAITING_LOCK;
             mCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
                     mBackgroundHandler);
-        } catch (CameraAccessException | NullPointerException e) {
+        } catch (CameraAccessException e) {
             e.printStackTrace();
         }
     }
@@ -836,10 +810,6 @@ public class Camera2BasicFragment extends Fragment
             e.printStackTrace();
         }
     }
-
-    int picCount = 0;
-
-    ArrayList<String> resultPicPathValue = new ArrayList<>(10);
 
     /**
      * Capture a still picture. This method should be called when we get a response in
@@ -872,21 +842,13 @@ public class Camera2BasicFragment extends Fragment
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                                                @NonNull CaptureRequest request,
                                                @NonNull TotalCaptureResult result) {
-                    picCount++;
-//                    showToast("Saved: " + mFile);
-//                    showToast("第" + picCount + "张拍完照啦");
-                    Log.d(TAG, "第" + picCount + "张拍完照啦");
+                    showToast("Saved: " + mFile);
+                    Intent intent = new Intent();
+                    intent.putExtra("picPathValue", mFile.toString());
+                    getActivity().setResult(RESULT_OK, intent);
                     Log.d(TAG, mFile.toString());
-
-//                    resultPicPathValue.add(mFile.toString());
-//                    if (picCount >= phontNum - 2) {
-                    if (picCount >= 4) {
-                        Intent intent = new Intent();
-                        intent.putStringArrayListExtra("picPathValue", resultPicPathValue);
-                        getActivity().setResult(RESULT_OK, intent);
-                        getActivity().finish();
-                    }
                     unlockFocus();
+                    getActivity().finish();
                 }
             };
 
@@ -897,7 +859,6 @@ public class Camera2BasicFragment extends Fragment
             e.printStackTrace();
         }
     }
-
 
     /**
      * Retrieves the JPEG orientation from the specified screen rotation.
@@ -929,10 +890,7 @@ public class Camera2BasicFragment extends Fragment
             mState = STATE_PREVIEW;
             mCaptureSession.setRepeatingRequest(mPreviewRequest, mCaptureCallback,
                     mBackgroundHandler);
-        } catch (CameraAccessException | NullPointerException | IllegalStateException e) {
-            e.printStackTrace();
-        }
-        catch (Exception e){
+        } catch (CameraAccessException e) {
             e.printStackTrace();
         }
     }
@@ -944,7 +902,7 @@ public class Camera2BasicFragment extends Fragment
                 takePicture();
                 break;
             }
-      /*      case R.id.info: {
+            case R.id.info: {
                 Activity activity = getActivity();
                 if (null != activity) {
                     new AlertDialog.Builder(activity)
@@ -953,7 +911,7 @@ public class Camera2BasicFragment extends Fragment
                             .show();
                 }
                 break;
-            }*/
+            }
         }
     }
 

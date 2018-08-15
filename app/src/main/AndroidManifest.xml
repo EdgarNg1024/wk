@@ -38,7 +38,10 @@
             android:name=".photo.CameraActivity"
             android:configChanges="keyboardHidden|orientation"
             android:screenOrientation="landscape" />
-        <activity android:name=".fall.FallAlertActivity"></activity>
+        <activity
+            android:name=".fall.FallAlertActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:screenOrientation="landscape" />
     </application>
 
 </manifest>

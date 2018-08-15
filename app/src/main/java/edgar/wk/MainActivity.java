@@ -14,7 +14,6 @@ import android.widget.ImageView;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.model.Response;
 import com.ubtrobot.mini.action.ActionApi;
-import com.ubtrobot.mini.action.ActionInfo;
 import com.ubtrobot.mini.action.PlayActionListener;
 import com.ubtrobot.mini.voice.VoicePool;
 
@@ -22,13 +21,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import edgar.wk.face.dto.FaceDto;
 import edgar.wk.face.dto.HandRectangle;
+import edgar.wk.fall.FallAlertActivity;
+import edgar.wk.fall.dto.FallAlertResultDto;
 import edgar.wk.net.data.callback.JsonCallBack;
 import edgar.wk.photo.CameraActivity;
 import edgar.wk.utils.ToastManager;
@@ -40,13 +40,16 @@ public class MainActivity extends AppCompatActivity {
     HashMap<Long, FaceDto> resultFace = new HashMap<Long, FaceDto>();
     File file;
     public static int REQUEST_CAMERA = 222;
+    public static int REQUEST_FALLALERT = 333;
     private ActionApi actionApi;
+    private boolean isFallAlert = false;
 
 
     @BindView(R.id.imageView)
     ImageView imgView;
 
     String url = "https://api-cn.faceplusplus.com/humanbodypp/beta/gesture";
+    String fallAlertUrl = "https://api-cn.faceplusplus.com/humanbodypp/v1/skeleton";
     String api_key = "C3REx0MTx_6Fd5IzSCYkJ2CPG46fTsiU";
     String api_secret = "kPEyLMPQSyNe_FPiW9gfSzxDk1Rz6r6y";
 
@@ -63,32 +66,16 @@ public class MainActivity extends AppCompatActivity {
     void OnClick(View v) {
         switch (v.getId()) {
             case R.id.btnTakePhoto:
-
-//                new Timer().schedule(new TimerTask() {
-//                    @Override
-//                    public void run() {
-//                        MouthLedApi mouthLedApi = MouthLedApi.get();
-//                        mouthLedApi.startBreathModel(Color.argb(0, 255, 255, 0), 1000 * 3);
-//                        new Timer().schedule(new TimerTask() {
-//                            @Override
-//                            public void run() {
-//
-////                                MouthLedApi mouthLedApi = MouthLedApi.get();
-////                                mouthLedApi.startBreathModel(Color.argb(0, 255, 255, 0), 10000);
-//
-//                            }
-//                        }, 1000 * 0);
-//                    }
-//                }, 1000 * 0);
+                isFallAlert = false;
                 Intent intent = new Intent();
                 intent.setClass(MainActivity.this, CameraActivity.class);
                 startActivityForResult(intent, REQUEST_CAMERA);
                 break;
             case R.id.btnPoseNet:
-//                Intent i = new Intent();
-//                i.setClass(MainActivity.this, FallAlertActivity.class);
-//                startActivity(i);
-                ToastManager.getInstance(MainActivity.this).showText("正在开发中,敬请期待~");
+                isFallAlert = true;
+                Intent i = new Intent();
+                i.setClass(MainActivity.this, FallAlertActivity.class);
+                startActivityForResult(i, REQUEST_FALLALERT);
                 break;
 //                int moveTime = 100;
 //                ArrayList<MotionParam> angleList = new ArrayList<MotionParam>();
@@ -159,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
+            //动态手势识别交互
             isDealActionEd = false;
             ArrayList<String> picData = data.getStringArrayListExtra("picPathValue");
             imgView.setImageBitmap(BitmapFactory.decodeFile(picData.get(0)));
@@ -181,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
                             .params("api_key", api_key)
                             .params("api_secret", api_secret)
                             .params("image_file", picFile)
-                            .params("image_file", picUrl)
+//                                .params("image_file", picUrl)
                             .execute(new JsonCallBack<FaceDto>(FaceDto.class) {
 
                                 @Override
@@ -206,6 +194,34 @@ public class MainActivity extends AppCompatActivity {
                 }, 1000 * i++);
 
             }
+        } else if (requestCode == REQUEST_FALLALERT && resultCode == RESULT_OK) {
+            //倒地报警
+            String picUrl = data.getStringExtra("picPathValue");
+            imgView.setImageBitmap(BitmapFactory.decodeFile(picUrl));
+            File picFile = new File(picUrl);
+            OkGo.<FallAlertResultDto>post(fallAlertUrl)
+                    .headers("enctype", "multipart/form-data")
+                    .params("api_key", api_key)
+                    .params("api_secret", api_secret)
+                    .params("image_file", picFile)
+                    .execute(new JsonCallBack<FallAlertResultDto>(FallAlertResultDto.class) {
+
+                        @Override
+                        public void onSuccess(Response<FallAlertResultDto> response) {
+                            Log.d(TAG, "数据返回");
+                            FallAlertResultDto result = response.body();
+                            if (result != null && result.getSkeletons() != null && result.getSkeletons().size() > 0) {
+                                VoicePool.get().playTTs("哇,这里有人窝...", null);
+                            }
+                        }
+
+                        @Override
+                        public void onError(Response<FallAlertResultDto> response) {
+                            super.onError(response);
+                            ToastManager.getInstance(MainActivity.this).showText("衰佐啦");
+                        }
+                    });
+
         }
     }
 
@@ -216,22 +232,6 @@ public class MainActivity extends AppCompatActivity {
         actionApi = ActionApi.get();
     }
 
-    /**
-     * 获取动作列表
-     *
-     * @param view
-     */
-    public void getActionList(View view) {
-        List<ActionInfo> actionList = actionApi.getActionList();
-        for (ActionInfo actionInfo : actionList) {
-            Log.i(TAG, "============================================");
-            Log.i(TAG, "Action name======" + actionInfo.getName());
-            Log.i(TAG, "Action Id======" + actionInfo.getId());
-            Log.i(TAG, "Action Description======" + actionInfo.getDescription());
-            Log.i(TAG, "Action Duration======" + actionInfo.getDuration());
-        }
-        Log.i(TAG, "getActionList接口调用成功!");
-    }
 
     //是否已经执行了动作处理
     private boolean isDealActionEd = false;
