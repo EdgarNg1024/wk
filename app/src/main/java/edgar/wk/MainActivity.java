@@ -29,7 +29,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import edgar.wk.face.dto.FaceDto;
 import edgar.wk.face.dto.HandRectangle;
-import edgar.wk.fall.FallAlertActivity;
 import edgar.wk.net.data.callback.JsonCallBack;
 import edgar.wk.photo.CameraActivity;
 import edgar.wk.utils.ToastManager;
@@ -86,9 +85,10 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, REQUEST_CAMERA);
                 break;
             case R.id.btnPoseNet:
-                Intent i = new Intent();
-                i.setClass(MainActivity.this, FallAlertActivity.class);
-                startActivity(i);
+//                Intent i = new Intent();
+//                i.setClass(MainActivity.this, FallAlertActivity.class);
+//                startActivity(i);
+                ToastManager.getInstance(MainActivity.this).showText("正在开发中,敬请期待~");
                 break;
 //                int moveTime = 100;
 //                ArrayList<MotionParam> angleList = new ArrayList<MotionParam>();
