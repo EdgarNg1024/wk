@@ -14,7 +14,7 @@ public class FallAlertResultDto {
 
     private int time_used;
     private String image_id;
-    private List<Skeletons> skeletons;
+    private List<Skeleton> skeletons;
     private String request_id;
     public void setTime_used(int time_used) {
          this.time_used = time_used;
@@ -30,10 +30,10 @@ public class FallAlertResultDto {
          return image_id;
      }
 
-    public void setSkeletons(List<Skeletons> skeletons) {
+    public void setSkeletons(List<Skeleton> skeletons) {
          this.skeletons = skeletons;
      }
-     public List<Skeletons> getSkeletons() {
+     public List<Skeleton> getSkeletons() {
          return skeletons;
      }
 

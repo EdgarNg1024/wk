@@ -29,6 +29,7 @@ import edgar.wk.face.dto.FaceDto;
 import edgar.wk.face.dto.HandRectangle;
 import edgar.wk.fall.FallAlertActivity;
 import edgar.wk.fall.dto.FallAlertResultDto;
+import edgar.wk.fall.dto.Skeleton;
 import edgar.wk.net.data.callback.JsonCallBack;
 import edgar.wk.photo.CameraActivity;
 import edgar.wk.utils.ToastManager;
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     public static int REQUEST_CAMERA = 222;
     public static int REQUEST_FALLALERT = 333;
     private ActionApi actionApi;
-    private boolean isFallAlert = false;
+    private boolean isNeedConfirmFallAlert = false;
 
 
     @BindView(R.id.imageView)
@@ -66,13 +67,11 @@ public class MainActivity extends AppCompatActivity {
     void OnClick(View v) {
         switch (v.getId()) {
             case R.id.btnTakePhoto:
-                isFallAlert = false;
                 Intent intent = new Intent();
                 intent.setClass(MainActivity.this, CameraActivity.class);
                 startActivityForResult(intent, REQUEST_CAMERA);
                 break;
             case R.id.btnPoseNet:
-                isFallAlert = true;
                 Intent i = new Intent();
                 i.setClass(MainActivity.this, FallAlertActivity.class);
                 startActivityForResult(i, REQUEST_FALLALERT);
@@ -211,6 +210,13 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG, "数据返回");
                             FallAlertResultDto result = response.body();
                             if (result != null && result.getSkeletons() != null && result.getSkeletons().size() > 0) {
+                                //只有一个人的时候,倒下才需要报警
+                                boolean isNeedAlert = isNeedConfirmFallAlert && judgePose(result.getSkeletons().get(0));
+                                isNeedConfirmFallAlert = judgePose(result.getSkeletons().get(0));
+                                if (isNeedAlert) {
+                                    //需要报警
+                                    VoicePool.get().playTTs("这里有人跌倒啦~快来帮忙啊!!!!", null);
+                                }
                                 VoicePool.get().playTTs("哇,这里有人窝...", null);
                             }
                         }
@@ -223,6 +229,18 @@ public class MainActivity extends AppCompatActivity {
                     });
 
         }
+    }
+
+    /**
+     * 根据姿态判断是否跌倒
+     *
+     * @param skeleton
+     */
+    private boolean judgePose(Skeleton skeleton) {
+        boolean result = false;
+        // TODO: 2018/8/15 0015 需要完善如何判断是跌倒了
+//if(skeleton.getLandmark().getLeft_shoulder())
+        return result;
     }
 
     /**

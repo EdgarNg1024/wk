@@ -9,7 +9,7 @@ package edgar.wk.fall.dto;
  * @author bejson.com (i@bejson.com)
  * @website http://www.bejson.com/java2pojo/
  */
-public class Skeletons {
+public class Skeleton {
 
     private Body_rectangle body_rectangle;
     private Landmark landmark;

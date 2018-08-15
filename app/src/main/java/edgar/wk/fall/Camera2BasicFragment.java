@@ -457,6 +457,10 @@ public class Camera2BasicFragment extends Fragment
         } else {
             mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
         }
+
+        this.getView().postDelayed(() -> {
+            takePicture();
+        }, 100);
     }
 
     @Override
