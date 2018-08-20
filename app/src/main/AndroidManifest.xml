@@ -42,6 +42,7 @@
             android:name=".fall.FallAlertActivity"
             android:configChanges="keyboardHidden|orientation"
             android:screenOrientation="landscape" />
+        <activity android:name=".help.activity.HelpActivity"></activity>
     </application>
 
 </manifest>

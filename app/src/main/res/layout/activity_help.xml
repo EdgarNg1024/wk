@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context="edgar.wk.help.activity.HelpActivity">
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="==================Config Start==================" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textView1"
+        android:layout_marginTop="12dp"
+        android:text="联系人(多人以逗号隔开):" />
+
+    <EditText
+        android:id="@+id/etPerson"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textView"
+        android:text="15099976085"
+        android:hint="这里输入联系人手机号码(多人以逗号隔开)"/>
+
+
+    <TextView
+        android:id="@+id/textViewContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/etPerson"
+        android:layout_marginTop="12dp"
+        android:text="报警短信语句" />
+
+    <EditText
+        android:id="@+id/etMsgContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewContent"
+        android:text="救命!我是老王,我在家受伤了,无法拨打手机以及开门求救.见短信速回!--发自贴心收到求救的悟空宝宝"
+        android:hint="这里输入报警短信语句"/>
+
+    <TextView
+        android:id="@+id/textViewTelContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/etMsgContent"
+        android:layout_marginTop="12dp"
+        android:text="报警电话语句" />
+
+    <EditText
+        android:id="@+id/etTelContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewTelContent"
+        android:text="救命救命!我是老王家的智能机器人悟空.老王在家受伤了,无法拨打手机以及开门求救.地址是广州市天河区智能大厦9楼903,请尽快派人来,谢谢!我的紧急联系人是儿子小王:13800138000"
+        android:hint="这里输入报警短信语句"/>
+
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_below="@id/etTelContent"
+        android:text="==================Config End==================" />
+
+
+    <Button
+        android:id="@+id/btnHelp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView2"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="26dp"
+        android:text="点击模拟老人喊救命" />
+
+</RelativeLayout>

@@ -30,6 +30,7 @@ import edgar.wk.face.dto.HandRectangle;
 import edgar.wk.fall.FallAlertActivity;
 import edgar.wk.fall.dto.FallAlertResultDto;
 import edgar.wk.fall.dto.Skeleton;
+import edgar.wk.help.activity.HelpActivity;
 import edgar.wk.net.data.callback.JsonCallBack;
 import edgar.wk.photo.CameraActivity;
 import edgar.wk.utils.ToastManager;
@@ -63,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         initRobot();
     }
 
-    @OnClick({R.id.btnTakePhoto, R.id.btnPoseNet})
+    @OnClick({R.id.btnTakePhoto, R.id.btnPoseNet, R.id.btnHelp})
     void OnClick(View v) {
         switch (v.getId()) {
             case R.id.btnTakePhoto:
@@ -75,6 +76,11 @@ public class MainActivity extends AppCompatActivity {
                 Intent i = new Intent();
                 i.setClass(MainActivity.this, FallAlertActivity.class);
                 startActivityForResult(i, REQUEST_FALLALERT);
+                break;
+            case R.id.btnHelp:
+                Intent i2 = new Intent();
+                i2.setClass(MainActivity.this, HelpActivity.class);
+                startActivity(i2);
                 break;
 //                int moveTime = 100;
 //                ArrayList<MotionParam> angleList = new ArrayList<MotionParam>();
@@ -301,5 +307,7 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+
+
 
 }
