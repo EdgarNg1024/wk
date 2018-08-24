@@ -4,22 +4,15 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
+import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.EditText;
-
-import com.ubtechinc.sauron.api.FaceInfo;
-import com.ubtrobot.commons.ResponseListener;
-import com.ubtrobot.mini.sauron.FaceApi;
-import com.ubtrobot.mini.sauron.FaceFindListener;
-import com.ubtrobot.mini.sauron.TakePicApi;
 
 import java.util.Arrays;
 import java.util.List;
@@ -68,8 +61,8 @@ public class HelpActivity extends AppCompatActivity {
                                     if (permission.granted) {
                                         // 用户已经同意该权限
 
-                                        //找人脸
-                                        long timeout = 10000;
+                                       /* //找人脸
+                                        long timeout = 15;//单位是秒
                                         FaceApi.get().findFace(timeout, new FaceFindListener() {
                                             @Override
                                             public void onPause() {
@@ -89,11 +82,14 @@ public class HelpActivity extends AppCompatActivity {
                                                     @Override
                                                     public void onResponseSuccess(Void aVoid) {
                                                         //发彩信
+                                                        LogUtils.d(aVoid);
                                                     }
 
                                                     @Override
                                                     public void onFailure(int i, @NonNull String s) {
                                                         //失败就发短信
+                                                        LogUtils.d(i + "_ " + s);
+
                                                     }
                                                 });
                                             }
@@ -107,7 +103,7 @@ public class HelpActivity extends AppCompatActivity {
                                             public void onFailure(int i, String s) {
                                                 //找不到就发短信
                                                 // 获取短信管理器
-                                                android.telephony.SmsManager smsManager = android.telephony.SmsManager
+                                              *//*  android.telephony.SmsManager smsManager = android.telephony.SmsManager
                                                         .getDefault();
 
                                                 for (String phoneNum : phoneMembers) {
@@ -116,21 +112,25 @@ public class HelpActivity extends AppCompatActivity {
                                                     for (String text : divideContents) {
                                                         smsManager.sendTextMessage(phoneNum, null, text, null, null);
                                                     }
-                                                }
+                                                }*//*
                                             }
-                                        });
+                                        });*/
 
 
                                         //同时按顺序拨打电话
                                         // TODO: 2018/8/21 0021 不通的话,接着打电话给别人,全都不通的话,就打电话给120;如果已经通了的话,就不继续拨打电话了
                                         //监听处理
                                         TelephonyManager mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                                        MediaPlayer mplayer = new MediaPlayer();
                                         PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
                                             @Override
                                             public void onCallStateChanged(int state, String incomingNumber) {
-                                                LogUtils.d(state);
+                                                LogUtils.w(state);
                                                 switch (state) {
                                                     case TelephonyManager.CALL_STATE_IDLE: //空闲
+                                                        if (!isNeedCall) {
+                                                            mplayer.stop();
+                                                        }
                                                         break;
                                                     case TelephonyManager.CALL_STATE_RINGING: //响铃来电
                                                         break;
@@ -139,14 +139,13 @@ public class HelpActivity extends AppCompatActivity {
                                                         isNeedCall = false;
                                                         //todo 播放预设好的语音
 
-                                                        MediaPlayer mplayer=new MediaPlayer();
-                                                        mplayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                                                        String path="";
+
                                                         try {
-                                                            mplayer.setDataSource(path);
+                                                            AssetFileDescriptor fd = HelpActivity.this.getAssets().openFd("gckl.mp3");
+                                                            mplayer.setDataSource(fd);
                                                             mplayer.prepare();
                                                             mplayer.start();
-                                                        } catch (Exception e){
+                                                        } catch (Exception e) {
                                                             e.printStackTrace();
                                                         }
 
