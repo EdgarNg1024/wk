@@ -14,6 +14,10 @@ import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.EditText;
 
+import com.ubtechinc.sauron.api.FaceInfo;
+import com.ubtrobot.mini.sauron.FaceApi;
+import com.ubtrobot.mini.sauron.FaceFindListener;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,6 +25,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import edgar.wk.R;
+import edgar.wk.fall.FallAlertActivity;
+import edgar.wk.sms.APNManager;
+import edgar.wk.sms.MMSInfo;
+import edgar.wk.sms.MMSSender;
 import edgar.wk.utils.LogUtils;
 import edgar.wk.utils.permissions.Permission;
 import edgar.wk.utils.permissions.RxPermissions;
@@ -39,6 +47,11 @@ public class HelpActivity extends AppCompatActivity {
     String msgContent;
     //是否需要打电话
     boolean isNeedCall = true;
+    public static int REQUEST_FALLALERT = 333;
+    //打电话的时间戳
+    private long tsCall = 0;
+    //phone index
+    private int callIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +74,7 @@ public class HelpActivity extends AppCompatActivity {
                                     if (permission.granted) {
                                         // 用户已经同意该权限
 
-                                       /* //找人脸
+                                        //找人脸
                                         long timeout = 15;//单位是秒
                                         FaceApi.get().findFace(timeout, new FaceFindListener() {
                                             @Override
@@ -76,22 +89,10 @@ public class HelpActivity extends AppCompatActivity {
 
                                             @Override
                                             public void onFaceChange(List<FaceInfo> list) {
-                                                //找到就发彩信
-                                                // TODO: 2018/8/21 0021 发彩信
-                                                TakePicApi.get().takePicImmediately(new ResponseListener<Void>() {
-                                                    @Override
-                                                    public void onResponseSuccess(Void aVoid) {
-                                                        //发彩信
-                                                        LogUtils.d(aVoid);
-                                                    }
-
-                                                    @Override
-                                                    public void onFailure(int i, @NonNull String s) {
-                                                        //失败就发短信
-                                                        LogUtils.d(i + "_ " + s);
-
-                                                    }
-                                                });
+                                                //找到人就拍照之后发彩信
+                                                Intent i = new Intent();
+                                                i.setClass(HelpActivity.this, FallAlertActivity.class);
+                                                startActivityForResult(i, REQUEST_FALLALERT);
                                             }
 
                                             @Override
@@ -103,7 +104,7 @@ public class HelpActivity extends AppCompatActivity {
                                             public void onFailure(int i, String s) {
                                                 //找不到就发短信
                                                 // 获取短信管理器
-                                              *//*  android.telephony.SmsManager smsManager = android.telephony.SmsManager
+                                                android.telephony.SmsManager smsManager = android.telephony.SmsManager
                                                         .getDefault();
 
                                                 for (String phoneNum : phoneMembers) {
@@ -112,13 +113,11 @@ public class HelpActivity extends AppCompatActivity {
                                                     for (String text : divideContents) {
                                                         smsManager.sendTextMessage(phoneNum, null, text, null, null);
                                                     }
-                                                }*//*
+                                                }
                                             }
-                                        });*/
+                                        });
 
 
-                                        //同时按顺序拨打电话
-                                        // TODO: 2018/8/21 0021 不通的话,接着打电话给别人,全都不通的话,就打电话给120;如果已经通了的话,就不继续拨打电话了
                                         //监听处理
                                         TelephonyManager mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
                                         MediaPlayer mplayer = new MediaPlayer();
@@ -131,14 +130,35 @@ public class HelpActivity extends AppCompatActivity {
                                                         if (!isNeedCall) {
                                                             mplayer.stop();
                                                         }
+                                                        isNeedCall = true;
+
+                                                        if (tsCall != 0) {
+                                                            //没有打过电话
+                                                            long des = System.currentTimeMillis() - tsCall;
+                                                            if (65 < des || des < 80) {
+                                                                //无人听电话
+                                                                //可以继续拨打下一个电话
+                                                                callIndex++;
+                                                                if (callIndex < phoneMembers.size()) {
+                                                                    callPhone(phoneMembers.get(callIndex));
+                                                                }
+                                                            }else{
+                                                                tsCall = 0;
+                                                                //如果已经有人接听了,那就不需要再打电话了
+                                                            }
+                                                        }
+
                                                         break;
                                                     case TelephonyManager.CALL_STATE_RINGING: //响铃来电
                                                         break;
                                                     case TelephonyManager.CALL_STATE_OFFHOOK: //摘机（正在通话中）
                                                         //打通了,就不需要再拨打了
+                                                        if (isNeedCall) {
+                                                            tsCall = System.currentTimeMillis();
+                                                        }
+
                                                         isNeedCall = false;
                                                         //todo 播放预设好的语音
-
 
                                                         try {
                                                             AssetFileDescriptor fd = HelpActivity.this.getAssets().openFd("gckl.mp3");
@@ -158,12 +178,12 @@ public class HelpActivity extends AppCompatActivity {
                                         };
                                         if (mTelephonyManager != null) {
                                             mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+
                                         }
-                                        for (String phoneNum : phoneMembers) {
-                                            if (!isNeedCall)
-                                                continue;
-                                            callPhone(phoneNum);
-                                            // TODO: 2018/8/21 0021  全都不通的话,就打电话给120
+                                        if (phoneMembers != null && phoneMembers.size() > 0) {
+                                            callPhone(phoneMembers.get(0));
+                                            phoneMembers.add("120");
+
                                         }
                                     } else if (permission.shouldShowRequestPermissionRationale) {
                                         // 用户拒绝了该权限，没有选中『不再询问』（Never ask again）,那么下次再次启动时，还会提示请求权限的对话框
@@ -193,4 +213,42 @@ public class HelpActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * 发彩信
+     *
+     * @param context
+     * @param number
+     * @param subject
+     * @param text
+     * @param imagePath
+     * @param audioPath
+     */
+    public static void sendMMS(final Context context, String number,
+                               String subject, String text, String imagePath, String audioPath) {
+        final MMSInfo mmsInfo = new MMSInfo(context, number, subject, text,
+                imagePath, audioPath);
+        final List<String> list = APNManager.getSimMNC(context);
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    byte[] res = MMSSender.sendMMS(context, list,
+                            mmsInfo.getMMSBytes());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_FALLALERT && resultCode == RESULT_OK) {
+            //拍照的图片
+            String picUrl = data.getStringExtra("picPathValue");
+            sendMMS(HelpActivity.this, "13423699944", "SOS", "Help Me!!!", picUrl, "");
+        }
+    }
 }
