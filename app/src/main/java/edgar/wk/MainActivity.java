@@ -27,9 +27,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import edgar.wk.face.dto.FaceDto;
 import edgar.wk.face.dto.HandRectangle;
-import edgar.wk.fall.FallAlertActivity;
 import edgar.wk.fall.dto.FallAlertResultDto;
 import edgar.wk.fall.dto.Skeleton;
+import edgar.wk.help.activity.Help2Activity;
 import edgar.wk.help.activity.HelpActivity;
 import edgar.wk.net.data.callback.JsonCallBack;
 import edgar.wk.photo.CameraActivity;
@@ -74,9 +74,11 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.btnPoseNet:
                 Intent i = new Intent();
-                i.setClass(MainActivity.this, FallAlertActivity.class);
-                startActivityForResult(i, REQUEST_FALLALERT);
+                i.setClass(MainActivity.this, Help2Activity.class);
+//                startActivityForResult(i, REQUEST_FALLALERT);
+                startActivity(i);
                 break;
+
             case R.id.btnHelp:
                 Intent i2 = new Intent();
                 i2.setClass(MainActivity.this, HelpActivity.class);
