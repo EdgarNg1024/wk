@@ -11,10 +11,19 @@
         android:padding="16dp"
         tools:context="edgar.wk.help.activity.HelpActivity">
 
+        <Button
+            android:id="@+id/btnHelp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="26dp"
+            android:text="点击模拟老人喊救命" />
+
         <TextView
             android:id="@+id/textView1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/btnHelp"
             android:gravity="center"
             android:text="=========Config Start=========" />
 
@@ -32,7 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/textView"
             android:hint="这里输入联系人手机号码(多人以逗号隔开)"
-            android:text="15099976085" />
+            android:text="150999XXXX,134503XXXX" />
 
 
         <TextView
@@ -76,15 +85,6 @@
             android:gravity="center"
             android:text="======Config End======" />
 
-
-        <Button
-            android:id="@+id/btnHelp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/textView2"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="26dp"
-            android:text="点击模拟老人喊救命" />
 
     </RelativeLayout>
 </ScrollView>

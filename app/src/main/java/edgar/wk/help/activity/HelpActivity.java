@@ -4,13 +4,13 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
@@ -18,6 +18,7 @@ import com.ubtechinc.sauron.api.FaceInfo;
 import com.ubtrobot.mini.sauron.FaceApi;
 import com.ubtrobot.mini.sauron.FaceFindListener;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,10 +26,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import edgar.wk.R;
-import edgar.wk.fall.FallAlertActivity;
-import edgar.wk.sms.APNManager;
-import edgar.wk.sms.MMSInfo;
-import edgar.wk.sms.MMSSender;
 import edgar.wk.utils.LogUtils;
 import edgar.wk.utils.permissions.Permission;
 import edgar.wk.utils.permissions.RxPermissions;
@@ -53,6 +50,8 @@ public class HelpActivity extends AppCompatActivity {
     //phone index
     private int callIndex = 0;
 
+    private final String TAG = "HelpActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +64,8 @@ public class HelpActivity extends AppCompatActivity {
     void OnClick(View v) {
         switch (v.getId()) {
             case R.id.btnHelp:
-                phoneMembers = Arrays.asList(EtPhoneMembers.getText().toString().split(","));
+                phoneMembers = new ArrayList<String>();
+                phoneMembers.addAll(Arrays.asList(EtPhoneMembers.getText().toString().split(",")));
                 msgContent = EtMsgContent.getText().toString();
 
 
@@ -90,9 +90,18 @@ public class HelpActivity extends AppCompatActivity {
                                             @Override
                                             public void onFaceChange(List<FaceInfo> list) {
                                                 //找到人就拍照之后发彩信
-                                                Intent i = new Intent();
-                                                i.setClass(HelpActivity.this, FallAlertActivity.class);
-                                                startActivityForResult(i, REQUEST_FALLALERT);
+                                                //找不到就发短信
+                                                // 获取短信管理器
+                                                android.telephony.SmsManager smsManager = android.telephony.SmsManager
+                                                        .getDefault();
+
+                                                for (String phoneNum : phoneMembers) {
+                                                    // 拆分短信内容（手机短信长度限制）
+                                                    List<String> divideContents = smsManager.divideMessage(msgContent);
+                                                    for (String text : divideContents) {
+                                                        smsManager.sendTextMessage(phoneNum, null, text, null, null);
+                                                    }
+                                                }
                                             }
 
                                             @Override
@@ -127,6 +136,7 @@ public class HelpActivity extends AppCompatActivity {
                                                 LogUtils.w(state);
                                                 switch (state) {
                                                     case TelephonyManager.CALL_STATE_IDLE: //空闲
+                                                        LogUtils.d("空闲");
                                                         if (!isNeedCall) {
                                                             mplayer.stop();
                                                         }
@@ -135,14 +145,15 @@ public class HelpActivity extends AppCompatActivity {
                                                         if (tsCall != 0) {
                                                             //没有打过电话
                                                             long des = System.currentTimeMillis() - tsCall;
-                                                            if (65 < des || des < 80) {
+                                                            LogUtils.d(des);
+                                                            if (65 * 1000 < des || des < 80 * 1000) {
                                                                 //无人听电话
                                                                 //可以继续拨打下一个电话
                                                                 callIndex++;
                                                                 if (callIndex < phoneMembers.size()) {
                                                                     callPhone(phoneMembers.get(callIndex));
                                                                 }
-                                                            }else{
+                                                            } else {
                                                                 tsCall = 0;
                                                                 //如果已经有人接听了,那就不需要再打电话了
                                                             }
@@ -150,8 +161,10 @@ public class HelpActivity extends AppCompatActivity {
 
                                                         break;
                                                     case TelephonyManager.CALL_STATE_RINGING: //响铃来电
+                                                        LogUtils.d("响铃来电");
                                                         break;
                                                     case TelephonyManager.CALL_STATE_OFFHOOK: //摘机（正在通话中）
+                                                        LogUtils.d("正在通话中");
                                                         //打通了,就不需要再拨打了
                                                         if (isNeedCall) {
                                                             tsCall = System.currentTimeMillis();
@@ -160,14 +173,14 @@ public class HelpActivity extends AppCompatActivity {
                                                         isNeedCall = false;
                                                         //todo 播放预设好的语音
 
-                                                        try {
+                                                      /*  try {
                                                             AssetFileDescriptor fd = HelpActivity.this.getAssets().openFd("gckl.mp3");
                                                             mplayer.setDataSource(fd);
                                                             mplayer.prepare();
                                                             mplayer.start();
                                                         } catch (Exception e) {
                                                             e.printStackTrace();
-                                                        }
+                                                        }*/
 
                                                         break;
                                                     default:
@@ -178,7 +191,6 @@ public class HelpActivity extends AppCompatActivity {
                                         };
                                         if (mTelephonyManager != null) {
                                             mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
-
                                         }
                                         if (phoneMembers != null && phoneMembers.size() > 0) {
                                             callPhone(phoneMembers.get(0));
@@ -213,42 +225,9 @@ public class HelpActivity extends AppCompatActivity {
     }
 
 
-    /**
-     * 发彩信
-     *
-     * @param context
-     * @param number
-     * @param subject
-     * @param text
-     * @param imagePath
-     * @param audioPath
-     */
-    public static void sendMMS(final Context context, String number,
-                               String subject, String text, String imagePath, String audioPath) {
-        final MMSInfo mmsInfo = new MMSInfo(context, number, subject, text,
-                imagePath, audioPath);
-        final List<String> list = APNManager.getSimMNC(context);
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    byte[] res = MMSSender.sendMMS(context, list,
-                            mmsInfo.getMMSBytes());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }.start();
-    }
-
-
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_FALLALERT && resultCode == RESULT_OK) {
-            //拍照的图片
-            String picUrl = data.getStringExtra("picPathValue");
-            sendMMS(HelpActivity.this, "13423699944", "SOS", "Help Me!!!", picUrl, "");
-        }
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
     }
 }
