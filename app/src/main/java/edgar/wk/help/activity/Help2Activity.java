@@ -23,6 +23,8 @@ import com.ubtrobot.mini.voice.VoicePool;
 
 import java.io.File;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -76,9 +78,10 @@ public class Help2Activity extends AppCompatActivity {
     private final String TAG = "Help2Activity";
 
     //检测间隔20s
-    private final int checkGap = 20 * 1000;
+    private final int checkGap = 15;
     //是否检测到病人已经跌倒,20s后还是跌倒状态就启动报警
     private boolean isFall = false;
+    private Timer timer;
 
     @OnClick({R.id.btnHelp})
     void OnClick(View v) {
@@ -88,14 +91,15 @@ public class Help2Activity extends AppCompatActivity {
                 //之后就判断是否跌倒状态
                 //跌倒之后,过2分钟之后再找人脸
                 //找到还是跌倒状态的话就启动报警流程
-
-                // TODO: 2018/8/30 0030 找到人脸之后,摄像头要停止
-                Intent i = new Intent();
-                i.setClass(Help2Activity.this, FallAlertActivity.class);
-                startActivityForResult(i, REQUEST_FALLALERT);
+                timer = null;
+                timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        watch();
+                    }
+                }, 0, checkGap * 1000);
                 break;
-
-
 //            case R.id.btnGo:
 //                // TODO: 2018/8/30 0030 这些先不处理
 //                phoneMembers = new ArrayList<String>();
@@ -246,6 +250,17 @@ public class Help2Activity extends AppCompatActivity {
 
 
     /**
+     * 开启监测
+     */
+    private void watch() {
+        // TODO: 2018/8/30 0030 找到人脸之后,摄像头要停止
+        Intent i = new Intent();
+        i.setClass(Help2Activity.this, FallAlertActivity.class);
+        startActivityForResult(i, REQUEST_FALLALERT);
+    }
+
+
+    /**
      * 拨打电话（直接拨打电话）
      *
      * @param phoneNum 电话号码
@@ -295,9 +310,10 @@ public class Help2Activity extends AppCompatActivity {
                                 if (isNeedAlert) {
                                     //需要报警
                                     VoicePool.get().playTTs("这里有人跌倒啦~快来帮忙啊!!!!", null);
-                                    baojing();
+                                    timer.cancel();
+//                                    baojing();
                                 } else if (isFallNow) {
-                                    VoicePool.get().playTTs("这里有人跌倒窝~等我看看你能不能够站起来先!!!", null);
+                                    VoicePool.get().playTTs("这里有人跌倒窝~给你" + checkGap + "m秒,等我看看你能不能够站起来先!!!", null);
                                 } else {
                                     VoicePool.get().playTTs("哇,这里有人窝...", null);
                                 }
@@ -335,7 +351,13 @@ public class Help2Activity extends AppCompatActivity {
         PosePoint p3 = skeleton.getLandmark().getLeft_buttocks();
         boolean result2 = getRound(p1.getX(), p1.getY(), p3.getX(), p3.getY()) < Math.sqrt(3);
 
-        result = result1 || result2;
+        //右跨
+        //小于1即右边的肩和胯的倾斜度小于60度,判断为跌倒
+        PosePoint p4 = skeleton.getLandmark().getLeft_buttocks();
+        boolean result3 = getRound(p2.getX(), p2.getY(), p4.getX(), p4.getY()) < Math.sqrt(3);
+
+        result = result1 || result2 || result3;
+        LogUtils.d("检测结果:" + result);
         return result;
     }
 
@@ -456,4 +478,10 @@ public class Help2Activity extends AppCompatActivity {
                 );
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        timer.cancel();
+        LogUtils.d("timer结束");
+    }
 }
