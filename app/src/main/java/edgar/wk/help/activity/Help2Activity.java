@@ -313,7 +313,7 @@ public class Help2Activity extends AppCompatActivity {
                                     timer.cancel();
 //                                    baojing();
                                 } else if (isFallNow) {
-                                    VoicePool.get().playTTs("这里有人跌倒窝~给你" + checkGap + "m秒,等我看看你能不能够站起来先!!!", null);
+                                    VoicePool.get().playTTs("这里有人跌倒窝~给你" + checkGap + "秒,等我看看你能不能够站起来先!!!", null);
                                 } else {
                                     VoicePool.get().playTTs("哇,这里有人窝...", null);
                                 }

@@ -12,6 +12,9 @@
         tools:context="edgar.wk.help.activity.HelpActivity">
 
         <Button
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:focusedByDefault="true"
             android:id="@+id/btnHelp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
