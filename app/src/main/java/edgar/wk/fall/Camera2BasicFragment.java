@@ -792,7 +792,7 @@ public class Camera2BasicFragment extends Fragment
             mState = STATE_WAITING_LOCK;
             mCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
                     mBackgroundHandler);
-        } catch (CameraAccessException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
