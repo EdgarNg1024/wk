@@ -29,7 +29,7 @@ import edgar.wk.face.dto.FaceDto;
 import edgar.wk.face.dto.HandRectangle;
 import edgar.wk.fall.dto.FallAlertResultDto;
 import edgar.wk.fall.dto.Skeleton;
-import edgar.wk.help.activity.Help2Activity;
+import edgar.wk.help.activity2.Help2Activity;
 import edgar.wk.help.activity.HelpActivity;
 import edgar.wk.net.data.callback.JsonCallBack;
 import edgar.wk.photo.CameraActivity;

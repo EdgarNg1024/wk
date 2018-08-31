@@ -13,10 +13,6 @@ import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.EditText;
 
-import com.ubtechinc.sauron.api.FaceInfo;
-import com.ubtrobot.mini.sauron.FaceApi;
-import com.ubtrobot.mini.sauron.FaceFindListener;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,6 +46,7 @@ public class HelpActivity extends AppCompatActivity {
     private int callIndex = 0;
 
     private final String TAG = "HelpActivity";
+    private final String alertNum2 = "120";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,13 +64,16 @@ public class HelpActivity extends AppCompatActivity {
                 phoneMembers.addAll(Arrays.asList(EtPhoneMembers.getText().toString().split(",")));
                 msgContent = EtMsgContent.getText().toString();
 
-
                 new RxPermissions(this).requestEach(Manifest.permission.CALL_PHONE, Manifest.permission.SEND_SMS)
                         .subscribe((Permission permission) -> {
                                     if (permission.granted) {
                                         // 用户已经同意该权限
 
-                                        //找人脸
+                                        // 获取短信管理器
+                                        android.telephony.SmsManager smsManager = android.telephony.SmsManager
+                                                .getDefault();
+
+                                        /*//找人脸
                                         long timeout = 15;//单位是秒
                                         FaceApi.get().findFace(timeout, new FaceFindListener() {
                                             @Override
@@ -98,7 +98,10 @@ public class HelpActivity extends AppCompatActivity {
                                                     // 拆分短信内容（手机短信长度限制）
                                                     List<String> divideContents = smsManager.divideMessage(msgContent);
                                                     for (String text : divideContents) {
-                                                        smsManager.sendTextMessage(phoneNum, null, text, null, null);
+                                                        LogUtils.d(phoneNum + text);
+                                                        if (!phoneNum.equals(alertNum2)) {
+                                                            smsManager.sendTextMessage(phoneNum, null, text, null, null);
+                                                        }
                                                     }
                                                 }
                                             }
@@ -124,7 +127,7 @@ public class HelpActivity extends AppCompatActivity {
                                                 }
                                             }
                                         });
-
+*/
 
                                         //监听处理
                                         TelephonyManager mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
@@ -193,8 +196,19 @@ public class HelpActivity extends AppCompatActivity {
                                         }
                                         if (phoneMembers != null && phoneMembers.size() > 0) {
                                             callPhone(phoneMembers.get(0));
-                                            phoneMembers.add("120");
-
+                                            if (!phoneMembers.get(phoneMembers.size() - 1).equals(alertNum2)) {
+                                                phoneMembers.add(alertNum2);
+                                            }
+                                            for (String phoneNum : phoneMembers) {
+                                                // 拆分短信内容（手机短信长度限制）
+                                                List<String> divideContents = smsManager.divideMessage(msgContent);
+                                                for (String text : divideContents) {
+                                                    LogUtils.d(phoneNum + text);
+                                                    if (!phoneNum.equals(alertNum2)) {
+                                                        smsManager.sendTextMessage(phoneNum, null, text, null, null);
+                                                    }
+                                                }
+                                            }
                                         }
                                     } else if (permission.shouldShowRequestPermissionRationale) {
                                         // 用户拒绝了该权限，没有选中『不再询问』（Never ask again）,那么下次再次启动时，还会提示请求权限的对话框

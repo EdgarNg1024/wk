@@ -1,4 +1,4 @@
-package edgar.wk.help.activity;
+package edgar.wk.help.activity2;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -22,6 +22,8 @@ import com.lzy.okgo.model.Response;
 import com.ubtrobot.mini.voice.VoicePool;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -64,7 +66,7 @@ public class Help2Activity extends AppCompatActivity {
     }
 
     //紧急联系人们
-    List<String> phoneMembers;
+    List<String> phoneMemberList;
     //消息内容
     String msgContent;
     //是否需要打电话
@@ -83,6 +85,8 @@ public class Help2Activity extends AppCompatActivity {
     private boolean isFall = false;
     private Timer timer;
 
+    private final String alertNum = "120";
+
     @OnClick({R.id.btnHelp})
     void OnClick(View v) {
         switch (v.getId()) {
@@ -91,6 +95,11 @@ public class Help2Activity extends AppCompatActivity {
                 //之后就判断是否跌倒状态
                 //跌倒之后,过2分钟之后再找人脸
                 //找到还是跌倒状态的话就启动报警流程
+
+                phoneMemberList = new ArrayList<String>();
+                phoneMemberList.addAll(Arrays.asList(EtPhoneMembers.getText().toString().split(",")));
+                msgContent = EtMsgContent.getText().toString();
+
                 timer = null;
                 timer = new Timer();
                 timer.schedule(new TimerTask() {
@@ -232,7 +241,7 @@ public class Help2Activity extends AppCompatActivity {
 //                                        }
 //                                        if (phoneMembers != null && phoneMembers.size() > 0) {
 //                                            callPhone(phoneMembers.get(0));
-//                                            phoneMembers.add("120");
+//                                            phoneMembers.add(alertNum);
 //
 //                                        }
 //                                    } else if (permission.shouldShowRequestPermissionRationale) {
@@ -309,13 +318,26 @@ public class Help2Activity extends AppCompatActivity {
 
                                 if (isNeedAlert) {
                                     //需要报警
-                                    VoicePool.get().playTTs("这里有人跌倒啦~快来帮忙啊!!!!", null);
+                                    VoicePool.get().playTTs("跌倒啦~快来帮忙啊!!!!", null);
                                     timer.cancel();
-//                                    baojing();
+//                                    btnHelp.postDelayed(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+                                    baojing();
+//                                        }
+//                                    },1000);
                                 } else if (isFallNow) {
                                     VoicePool.get().playTTs("这里有人跌倒窝~给你" + checkGap + "秒,等我看看你能不能够站起来先!!!", null);
                                 } else {
                                     VoicePool.get().playTTs("哇,这里有人窝...", null);
+/*
+                                    btnHelp.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            baojing();
+                                        }
+                                    },1000);*/
+
                                 }
                             }
                         }
@@ -390,15 +412,6 @@ public class Help2Activity extends AppCompatActivity {
                                 android.telephony.SmsManager smsManager = android.telephony.SmsManager
                                         .getDefault();
 
-                                for (String phoneNum : phoneMembers) {
-                                    // 拆分短信内容（手机短信长度限制）
-                                    List<String> divideContents = smsManager.divideMessage(msgContent);
-                                    for (String text : divideContents) {
-                                        smsManager.sendTextMessage(phoneNum, null, text, null, null);
-                                    }
-                                }
-
-
                                 //监听处理
                                 TelephonyManager mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
                                 MediaPlayer mplayer = new MediaPlayer();
@@ -422,8 +435,8 @@ public class Help2Activity extends AppCompatActivity {
                                                         //无人听电话
                                                         //可以继续拨打下一个电话
                                                         callIndex++;
-                                                        if (callIndex < phoneMembers.size()) {
-                                                            callPhone(phoneMembers.get(callIndex));
+                                                        if (callIndex < phoneMemberList.size()) {
+                                                            callPhone(phoneMemberList.get(callIndex));
                                                         }
                                                     } else {
                                                         tsCall = 0;
@@ -464,10 +477,21 @@ public class Help2Activity extends AppCompatActivity {
                                 if (mTelephonyManager != null) {
                                     mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
                                 }
-                                if (phoneMembers != null && phoneMembers.size() > 0) {
-                                    callPhone(phoneMembers.get(0));
-                                    phoneMembers.add("120");
-
+                                if (phoneMemberList != null && phoneMemberList.size() > 0) {
+                                    callPhone(phoneMemberList.get(0));
+                                    if (!phoneMemberList.get(phoneMemberList.size() - 1).equals(alertNum)) {
+                                        phoneMemberList.add(alertNum);
+                                    }
+                                    for (String phoneNum : phoneMemberList) {
+                                        // 拆分短信内容（手机短信长度限制）
+                                        List<String> divideContents = smsManager.divideMessage(msgContent);
+                                        for (String text : divideContents) {
+                                            LogUtils.d(phoneNum + text);
+                                            if (!phoneNum.equals(alertNum)) {
+                                                smsManager.sendTextMessage(phoneNum, null, text, null, null);
+                                            }
+                                        }
+                                    }
                                 }
                             } else if (permission.shouldShowRequestPermissionRationale) {
                                 // 用户拒绝了该权限，没有选中『不再询问』（Never ask again）,那么下次再次启动时，还会提示请求权限的对话框

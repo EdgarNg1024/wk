@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/textView"
             android:hint="这里输入联系人手机号码(多人以逗号隔开)"
-            android:text="15099976085,13450362613" />
+            android:text="134236999XX" />
 
 
         <TextView
